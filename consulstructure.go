@@ -237,6 +237,7 @@ func (d *Decoder) Run() {
 
 	// Listen for pair updates, wait the proper quiesence periods, and
 	// trigger configuration updates.
+	init := false
 	var pairs consul.KVPairs
 	var qscPeriodCh, qscTimeoutCh <-chan time.Time
 	for {
@@ -251,7 +252,13 @@ func (d *Decoder) Run() {
 				qscTimeoutCh = time.After(qscTimeout)
 			}
 
-			continue
+			// If we've initialized already, then we wait for qsc.
+			// Otherwise, we go through for the initial config.
+			if init {
+				continue
+			}
+
+			init = true
 		case <-qscPeriodCh:
 		case <-qscTimeoutCh:
 		}
