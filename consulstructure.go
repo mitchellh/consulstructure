@@ -204,6 +204,14 @@ func (d *Decoder) Run() {
 				// Query
 				var err error
 				pairs, meta, err = client.KV().List(d.Prefix, queryOpts)
+
+				// Been block waiting so first check if quitCh is closed and need to return now
+				select {
+				case <-quitCh:
+					return nil
+				default:
+				}
+
 				if err != nil {
 					errCh <- err
 				}
